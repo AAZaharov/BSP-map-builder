@@ -179,8 +179,8 @@ void GeometryGenerator::DrawPoints(sf::RenderWindow& app)
 
 void GeometryGenerator::DrawPoints(sf::RenderWindow& app, std::list<Vector2f>& PointList)
 {
-	CircleShape tmp(20);
-	tmp.setOrigin(20, 20);
+	CircleShape tmp(8);
+	tmp.setOrigin(8, 8);
 	tmp.setFillColor(OuterColor);
 
 	for (auto p : PointList)

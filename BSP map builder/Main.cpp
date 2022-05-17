@@ -13,12 +13,12 @@ int main()
 {
 	srand(time(NULL));
 
-	int X = 1200;
-	int Y = 1200;
+	int X = 600;
+	int Y = 600;
 
 	FieldGenerator FG(0, 0, X, Y);
 	GeometryGenerator GeGe(FG, Color::Black, Color::Black);
-	TSmoothing TS;
+	TSmoothing TS, TSforScale;
 
 	ContextSettings setting;
 	setting.antialiasingLevel = 2;
@@ -34,7 +34,7 @@ int main()
 
 	//
 
-	
+	std::list<Vector2f> ForScale;
 
 
    	while (app.isOpen())
@@ -104,9 +104,7 @@ int main()
 				{
 					TS.EraseContainer();
 					auto listtemp = GeGe.GetVectorList();
-					std::vector<Vector2f> vectortmp;
-					std::copy(listtemp.begin(), listtemp.end(), std::back_inserter(vectortmp));
-					TS.SetContainer(vectortmp);
+					TS.SetContainer(listtemp);
 					TS.SmoothTheLines();
 
 				}
@@ -116,8 +114,14 @@ int main()
 			{
 				if (e.key.code == sf::Keyboard::Num6)
 				{
+					
+					
+					ForScale = GeGe.GetVectorList();
+					ForScale = GeGe.ScaleTopology(ForScale);
 
-
+					TSforScale.EraseContainer();
+					TSforScale.SetContainer(ForScale);
+					TSforScale.SmoothTheLines();
 				}
 			}
 
@@ -152,6 +156,7 @@ int main()
 		}
 
 
+		// ENABLE TEXT WITH NUMBERS
 		int counter = 0;
 		for (auto& f : FG.GetCellList())
 		{
@@ -168,15 +173,13 @@ int main()
 
 			++counter;
 		}
-
+		/// /////////////////////////////
 
 		//DRAW SCALE POINTS FOR TEST
 		{
 			//TSmoothing SplinesForScale;
 
-			std::list<Vector2f> ForScale;
-			ForScale = GeGe.GetVectorList();
-			ForScale = GeGe.ScaleTopology(ForScale);
+
 			GeGe.DrawPoints(app, ForScale);
 
 			//SplinesForScale.SetContainer(ForScale);
@@ -189,6 +192,7 @@ int main()
 		GeGe.DrawLines(app);
 		GeGe.DrawPoints(app);
 		TS.DrawSplines(app);
+		TSforScale.DrawSplines(app);
 
 		app.display();
 	}
