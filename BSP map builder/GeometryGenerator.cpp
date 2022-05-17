@@ -2,7 +2,7 @@
 
 void GeometryGenerator::GeneratePoints()
 {
-	PointList.erase(PointList.begin(), PointList.end());
+	PointVector.erase(PointVector.begin(), PointVector.end());
 	VectorList.erase(VectorList.begin(), VectorList.end());
 
 	for (auto& f : FG->GetCellList())
@@ -17,58 +17,135 @@ void GeometryGenerator::GeneratePoints()
 
 		tmp.setPosition(a, b);
 
-		PointList.push_back(tmp);
+		PointVector.push_back(tmp);
 	};
-
-	/*con.setPointCount(0);*/
 
 	//Create container with points
 
-	for (auto c : PointList)
+	for (auto c : PointVector)
 	{
 		VectorList.push_back(c.getPosition());
 	}
 
 }
 
-bool GeometryGenerator::IsCollision(Vector2f P1, Vector2f P2, std::list<Vector2f> VectorListTmp)
+bool GeometryGenerator::IsCollision(Vector2f P1, Vector2f P2)
 {
+	
 
-	VectorListTmp.remove(P1);
-	VectorListTmp.remove(P2);
-	int counter = VectorListTmp.size();
-	for (int i = 0; i < counter-1; ++i)
+
+	int VectorSize = VectorList.size();
+	auto iter = std::find(VectorList.begin(), VectorList.end(), P2);
+	auto iterend = std::find(VectorList.begin(), VectorList.end(), P1);
+
+	Vector2f P3, P4;
+
+	++iter;
+	if (iter == VectorList.end())
 	{
-		Vector2f P3 = VectorListTmp.front();
-		
-		VectorListTmp.pop_front();
-		Vector2f P4 = VectorListTmp.front();
+		iter = VectorList.begin();
 
-		if (intersect(P1, P2, P3, P4))
+	}
+
+		while(iter != iterend)
 		{
-			std::cout << "P1(" << P1.x << "," << P1.y << ") P2(" << P2.x << "," << P2.y << ") P3(" << P3.x << "," << P3.y
-				<< ") P4(" << P4.x << "," << P4.y << ") is collusion\n";
-			return 1;
+			
+			P3 = *iter;
+			++iter;
+			if (iter == VectorList.end())
+			{
+				iter = VectorList.begin();
+				if (iter == iterend)
+				{
+					break;
+				}
+
+			}
+			else if (iter == iterend)
+			{
+				break;
+			}
+
+			P4 = *iter;
+
+			if (intersect(P1, P2, P3, P4))
+			{
+				return 1;
+			}
+			++iter;
+			if (iter == VectorList.end())
+			{
+				iter = VectorList.begin();
+				if (iter == iterend)
+				{
+					break;
+				}
+
+			}
+			else if (iter == iterend)
+			{
+				break;
+			}
 		}
 
-		//float Ua = ((P4.x - P3.x) * (P1.y - P3.y) - (P4.y - P3.y) * (P1.x - P3.x)) /
-		//	((P4.y - P3.y) * (P2.x - P1.x) - (P4.x - P3.x) * (P2.y - P1.y));
+	return 0;
+}
 
-		//float Ub = ((P2.x - P1.x) * (P1.y - P3.y) - (P2.y - P1.y) * (P1.x - P3.x)) /
-		//	((P4.y - P3.y) * (P2.x - P1.x) * (P4.x - P3.x) * (P2.y - P1.y));
+bool GeometryGenerator::CollisionTest(std::list<Vector2f> VectorListTemp)
+{
+	int VectorSize = VectorListTemp.size();
+	auto iter = VectorListTemp.begin();
+	Vector2f P1, P2, P3, P4;
+	for (int i = 0; i < VectorListTemp.size(); ++i)
+	{
+		std::advance(iter, i);
+		P1 = *iter;
+		++iter;
+		P2 = *iter;
+		++iter;
+		if (iter == VectorListTemp.end())
+		{
+			std::cout << "Overflow of iteration: " << i << std::endl;
+			break;
+		}
+		std::cout << "Iteration: " << i << std::endl;
+		for (int j = 0; j < VectorListTemp.size()-2-i; ++j)
+		{
+			std::cout << "Check vector: " << j << std::endl;
+			P3 = *iter;
+			++iter;
+			if (iter == VectorListTemp.end())
+			{
+				iter = VectorListTemp.begin();
+				if (P1 == VectorListTemp.front())
+				{
+					break;
+				}
+			}
 
-		//if ((Ua >= 0.00001 && Ua <= 1) && (Ub >= 0.00001 && Ub <= 1))
-		//{
-		//	return 1;
-		//}
+			P4 = *iter;
+			if (intersect(P1, P2, P3, P4))
+			{
+				
+				std::cout << "Vector(" << P1.x<<","<<P1.y << " : " << P2.x << "," << P2.y 
+					<< ") and vector(" << P3.x << "," << P3.y << " : " << P4.x << "," << P4.y<< ") have collision\n\n";
+			}
+			else
+			{
+				std::cout << "Vector(" << P1.x << "," << P1.y << " : " << P2.x << "," << P2.y
+					<< ") and vector(" << P3.x << "," << P3.y << " : " << P4.x << "," << P4.y << ") no collision\n\n";
+
+			}
+		}
 	}
+
 
 	return 0;
 }
 
 std::list<CircleShape> GeometryGenerator::GetPointList()
 {
-	return PointList;
+	return PointVector;
 }
 
 std::list<Vector2f> GeometryGenerator::GetVectorList()
@@ -78,7 +155,7 @@ std::list<Vector2f> GeometryGenerator::GetVectorList()
 
 void GeometryGenerator::DrawConvex(sf::RenderWindow& app)
 {
-	sf::ConvexShape Convex(PointList.size());
+	sf::ConvexShape Convex(PointVector.size());
 	Convex.setFillColor(Color::Transparent);
 	Convex.setOutlineThickness(-4);
 	Convex.setOutlineColor(OuterColor);
@@ -94,36 +171,74 @@ void GeometryGenerator::DrawConvex(sf::RenderWindow& app)
 
 void GeometryGenerator::DrawPoints(sf::RenderWindow& app)
 {
-	for (auto& p : PointList)
+	for (auto& p : PointVector)
 	{
 		app.draw(p);
 	}
 }
 
+void GeometryGenerator::DrawPoints(sf::RenderWindow& app, std::list<Vector2f>& PointList)
+{
+	CircleShape tmp(20);
+	tmp.setOrigin(20, 20);
+	tmp.setFillColor(OuterColor);
+
+	for (auto p : PointList)
+	{
+		tmp.setPosition(p);
+		app.draw(tmp);
+	}
+}
+
 void GeometryGenerator::DrawLines(sf::RenderWindow& app)
 {	
-	for (int i = 0; i < VectorList.size(); i++)
+	std::list<Vector2f>::iterator iter;
+
+	if (VectorList.size())
 	{
-		sf::LineShape Line(VectorList.front(), VectorList.back());
+		iter = VectorList.begin();
+
+		while (iter != --VectorList.end())
+		{
+			auto P1 = *iter;
+			auto P2 = *(++iter);
+
+
+			sf::LineShape Line(P1, P2);
+			Line.setThickness(8);
+			
+			// Test Collision
+
+			if (IsCollision(P1, P2))
+			{
+				Line.setFillColor(Color::Red);
+			}
+			else
+			{
+				Line.setFillColor(Color::Blue);
+			}
+
+			//
+
+			app.draw(Line);
+		}
+		
+		sf::LineShape Line(VectorList.back(), VectorList.front());
 		Line.setThickness(8);
 		Line.setFillColor(Color::Blue);
 
-		// Test Collision
-
-		//if (IsCollision(VectorList.front(), VectorList.back(), VectorList))
-		//{
-		//	Line.setFillColor(Color::Red);
-		//}
-		//else
-		//{
-		//	Line.setFillColor(Color::Blue);
-		//}
-
-		//
-		
-		VectorList.emplace_back(VectorList.front());
-		VectorList.pop_front();
-
 		app.draw(Line);
+
+	}
+}
+
+void GeometryGenerator::Test()
+{
+	std::cout << std::endl;
+	int counter = 0;
+	for (auto v : VectorList)
+	{
+		std::cout << "Point "<< counter<<": (" << v.x<<","<<v.y<<")" << std::endl;
+		counter++;
 	}
 }

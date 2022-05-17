@@ -3,8 +3,10 @@
 #include <SFML/Graphics.hpp>
 #include <math.h>
 #include <vector>
+#include <list>
 #include <math.h>
 #include <cmath>
+#include "sfLine.h"
 
 using namespace sf;
 
@@ -29,11 +31,17 @@ public:
 
 	virtual Vector2f FindBis(Vector2f& A, Vector2f& B, Vector2f& C);
 
-	inline int area(Vector2f& a, Vector2f& b, Vector2f& c);
+	Vector2f FindDeltaPoint(Vector2f& begin, Vector2f& end, float shift);
 
-	inline bool intersect_1(float a, float b, float c, float d);
+	inline double area(Vector2i& a, Vector2i& b, Vector2i& c);
+
+	inline bool intersect_1(int a, int b, int c, int d);
 
 	bool intersect(Vector2f& a, Vector2f& b, Vector2f& c, Vector2f& d);
+
+	
+	std::list<Vector2f> ScaleTopology(std::vector<Vector2f>&);
+	std::list<Vector2f> ScaleTopology(std::list<Vector2f>&);
 
 private:
 	 

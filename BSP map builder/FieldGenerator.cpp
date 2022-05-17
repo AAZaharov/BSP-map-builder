@@ -119,8 +119,6 @@ void FieldGenerator::FramesSort()
 
 	int flag = 0;
 	std::list<Cell> SortCel;
-	//std::copy(CellList.begin(), CellList.end(), std::back_inserter(SortCel));
-	//CellList.erase(CellList.begin(), CellList.end());
 
 	//Find first element
 	
@@ -142,7 +140,7 @@ void FieldGenerator::FramesSort()
 		//Start sorting to the right
 		case 0:
 		{
-			std::cout << "Go right " << SortCel.size() << "\n\n";
+
 			for (int i = 0; i < SortCel.size(); ++i)
 			{
 				for (auto& c : CellList)
@@ -171,7 +169,7 @@ void FieldGenerator::FramesSort()
 		//Start sorting downwards
 		case 1:
 		{
-			std::cout << "Go down " << SortCel.size() << "\n\n";
+
 			for (int i = 0; i < SortCel.size(); ++i)
 			{
 				
@@ -206,7 +204,7 @@ void FieldGenerator::FramesSort()
 		//Start sorting to the left
 		case 2:
 		{
-			std::cout << "Go left " << SortCel.size() << "\n\n";
+
 			for (int i = 0; i < SortCel.size(); ++i)
 			{
 				for (auto& c : CellList)
@@ -236,7 +234,7 @@ void FieldGenerator::FramesSort()
 		//Start sorting up with only one ellement adding
 		case 3:
 		{
-			std::cout << "Go up " << SortCel.size() << "\n\n";
+
 			for (auto& c : CellList)
 			{
 
@@ -259,16 +257,6 @@ void FieldGenerator::FramesSort()
 	CellList.erase(CellList.begin(), CellList.end());
 	std::copy(SortCel.begin(), SortCel.end(), std::back_inserter(CellList));
 	
-	//////////////////////////////////Удалить после тестов///////////////////////
-	//counter = 0;
-	//for (auto& c : SortCel)
-	//{
-	//	std::cout << "SORTCELL\n";
-	//	std::cout << counter << " X2 - " << c.p2.x << " Y2 - " << c.p2.y << " W= " << c.GetWidth() << " H= " << c.GetHeight() << std::endl;
-	//	++counter;
-	//}
-	//std::cout << std::endl;
-	/////////////////////////////////////////////////////////////////////////////
 }
 
 void FieldGenerator::FieldsDraw()
@@ -302,8 +290,6 @@ void FieldGenerator::Test()
 		std::cout << " X2 - " << c.p2.x << " Y2 - " << c.p2.y << " W= " << c.GetWidth() << " H= " << c.GetHeight() << std::endl;
 		++counter;
 	}
-
-
 	std::cout << std::endl;
 }
 

@@ -119,22 +119,105 @@ Vector2f VectorMath::FindBis(Vector2f& A, Vector2f& B, Vector2f& C)
 	return result;
 }
 
-inline int VectorMath::area(Vector2f& a, Vector2f& b, Vector2f& c)
+Vector2f VectorMath::FindDeltaPoint(Vector2f& begin, Vector2f& end, float shift)
 {
-	return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+	return Vector2f((begin.x + (end.x - begin.x) * shift), (begin.y + (end.y - begin.y) * shift));
 }
 
-inline bool VectorMath::intersect_1(float a, float b, float c, float d)
+inline double VectorMath::area(Vector2i& a, Vector2i& b, Vector2i& c)
+{
+
+	return ((b.x - a.x) * (c.y - a.y)) - ((b.y - a.y) * (c.x - a.x));
+}
+
+inline bool VectorMath::intersect_1(int a, int b, int c, int d)
 {
 	if (a > b)  std::swap(a, b);
 	if (c > d)  std::swap(c, d);
 	return std::max(a, c) <= std::min(b, d);
 }
 
-bool VectorMath::intersect(Vector2f& a, Vector2f& b, Vector2f& c, Vector2f& d)
+bool VectorMath::intersect(Vector2f& fa, Vector2f& fb, Vector2f& fc, Vector2f& fd)
 {
+	Vector2i a(fa);
+	Vector2i b(fb);
+	Vector2i c(fc);
+ 	Vector2i d(fd);
+
+	//auto S = area(a, b, c);
+	//auto S2 = area(a, b, d);
+	//auto S3 = area(c, d, a);
+	//auto S4 = area(c, d, b);
+
+
+	//double t1 = (area(a, b, c)) * (area(a, b, d));
+	//double t2 = (area(c, d, a)) * (area(c, d, b));
+	//auto t3 = intersect_1(a.x, b.x, c.x, d.x);
+	//auto t4 = intersect_1(a.y, b.y, c.y, d.y);
+
+
+
 	return intersect_1(a.x, b.x, c.x, d.x)
 		&& intersect_1(a.y, b.y, c.y, d.y)
 		&& area(a, b, c) * area(a, b, d) <= 0
 		&& area(c, d, a) * area(c, d, b) <= 0;
+}
+
+std::list<Vector2f> VectorMath::ScaleTopology(std::vector<Vector2f>& PointVector)
+{
+
+	std::vector<Vector2f>::iterator itA, itB, itC;
+
+	std::list<Vector2f> ScalePointList;
+
+	if (PointVector.size() < 3)
+	{
+		return ScalePointList;
+	}
+
+	Vector2f pointboofer;
+	//find offset point for first point
+	itA = PointVector.begin();
+	itB = --PointVector.end();
+	itC = itA + 1;
+
+
+	pointboofer = VectorMath::FindBis(*itA, *itB, *itC);
+	/*pointboofer = VectorMath::FindBis(points.at(0), points.at(points.size() - 1), points.at(1));*/
+	ScalePointList.push_back(pointboofer);
+
+	//find offsets for points from middle range 
+	itB = itA + 1;
+	itC = itB + 1;
+
+	while (itC != PointVector.end())
+	{
+
+		pointboofer = VectorMath::FindBis(*itB, *itA, *itC);
+		/*pointboofer = VectorMath::FindBis(points.at(i), points.at(i - 1), points.at(i + 1));*/
+		ScalePointList.push_back(pointboofer);
+		++itA;
+		++itB;
+		++itC;
+	}
+
+	//find offset point for last point
+	itA = PointVector.begin();
+	itB = --PointVector.end();
+	itC = itB - 1;
+
+	pointboofer = VectorMath::FindBis(*itB, *itC, *itA);
+	//pointboofer = VectorMath::FindBis(points.at(points.size() - 1), points.at(points.size() - 2), points.at(0));
+	ScalePointList.push_back(pointboofer);
+
+	return ScalePointList;
+	
+}
+
+std::list<Vector2f> VectorMath::ScaleTopology(std::list<Vector2f>& PointList)
+{
+	std::vector<Vector2f> PointVector;
+	std::copy(PointList.begin(), PointList.end(), std::back_inserter(PointVector));
+
+	return ScaleTopology(PointVector);
 }

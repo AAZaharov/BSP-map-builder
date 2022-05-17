@@ -1,7 +1,6 @@
 #pragma once
 #include "VectorMath.h"
 #include "FieldGenerator.h"
-#include "sfLine.h"
 #include <list>
 
 
@@ -23,20 +22,24 @@ public:
 
 	void GeneratePoints();
 
-	bool IsCollision(Vector2f, Vector2f, std::list<Vector2f>);
+	bool IsCollision(Vector2f, Vector2f);
+	bool CollisionTest(std::list<Vector2f>);
 
 	std::list<CircleShape> GetPointList();
 	std::list<Vector2f> GetVectorList();
 
 	void DrawConvex(sf::RenderWindow&);
 	void DrawPoints(sf::RenderWindow&);
+	void DrawPoints(sf::RenderWindow&, std::list<Vector2f>&);
 	void DrawLines(sf::RenderWindow&);
+
+	void Test();
 
 private:
 
 	FieldGenerator* FG = nullptr;
 	sf::Color OuterColor, InnerColor;
-	std::list<CircleShape> PointList;
+	std::list<CircleShape> PointVector;
 	std::list<Vector2f> VectorList;
 
 };

@@ -3,6 +3,7 @@
 #include "FieldGenerator.h"
 #include "GeometryGenerator.h"
 #include "sfLine.h"
+#include "TSmoothing.h"
 
 using namespace sf;
 
@@ -17,6 +18,7 @@ int main()
 
 	FieldGenerator FG(0, 0, X, Y);
 	GeometryGenerator GeGe(FG, Color::Black, Color::Black);
+	TSmoothing TS;
 
 	ContextSettings setting;
 	setting.antialiasingLevel = 2;
@@ -24,6 +26,7 @@ int main()
 	RenderWindow app(VideoMode(X, Y), "Map BSP", Style::Default, setting);
 	app.setFramerateLimit(20);
 
+	
 	//TEXT WITH NUMBERS
 
 	Font font;
@@ -33,18 +36,6 @@ int main()
 
 	
 
-	
-
-
-
-	//std::vector<Vertex> VerTest;
-
-	//VerTest.push_back(Vertex(Vector2f(100.f, 100.f), Color::Black));
-	//VerTest.push_back(Vertex(Vector2f(200.f, 100.f), Color::Black));
-	//VerTest.push_back(Vertex(Vector2f(100.f, 200.f), Color::Black));
-	//VerTest.push_back(Vertex(Vector2f(200.f, 200.f), Color::Black));
-	//VerTest.push_back(Vertex(Vector2f(100.f, 300.f), Color::Black));
-	//VerTest.push_back(Vertex(Vector2f(200.f, 300.f), Color::Black));
 
    	while (app.isOpen())
 	{
@@ -62,24 +53,9 @@ int main()
 					
 					FG.Test();
 
-
+					GeGe.Test();
 					// Test Collision
-					std::list<Vector2f> VectorList = GeGe.GetVectorList();
-					for (int i = 0; i < VectorList.size(); i++)
-					{
-
-						if (GeGe.IsCollision(VectorList.front(), VectorList.back(), VectorList))
-						{
-							std::cout << "Vector " << i << " is collision\n";
-						}
-						else
-						{
-							std::cout << "Vector " << i << " clear\n";
-						}
-
-						VectorList.emplace_back(VectorList.front());
-						VectorList.pop_front();
-					}
+					GeGe.CollisionTest(GeGe.GetVectorList());
 				}
 			}
 
@@ -126,7 +102,21 @@ int main()
 			{
 				if (e.key.code == sf::Keyboard::Num5)
 				{
-					
+					TS.EraseContainer();
+					auto listtemp = GeGe.GetVectorList();
+					std::vector<Vector2f> vectortmp;
+					std::copy(listtemp.begin(), listtemp.end(), std::back_inserter(vectortmp));
+					TS.SetContainer(vectortmp);
+					TS.SmoothTheLines();
+
+				}
+			}
+
+			if (e.type == Event::KeyReleased)
+			{
+				if (e.key.code == sf::Keyboard::Num6)
+				{
+
 
 				}
 			}
@@ -156,11 +146,6 @@ int main()
 
 
 
-
-
-
-
-
 		for (auto& con : FG.GetConvexList())
 		{
 			app.draw(con);
@@ -185,12 +170,25 @@ int main()
 		}
 
 
+		//DRAW SCALE POINTS FOR TEST
+		{
+			//TSmoothing SplinesForScale;
 
+			std::list<Vector2f> ForScale;
+			ForScale = GeGe.GetVectorList();
+			ForScale = GeGe.ScaleTopology(ForScale);
+			GeGe.DrawPoints(app, ForScale);
 
-		/*app.draw(GeGe.DrawConvex());*/
+			//SplinesForScale.SetContainer(ForScale);
+			//SplinesForScale.SmoothTheLines();
+			//SplinesForScale.DrawSplines(app);
+		}
+		/// /////////////////////////////
+
 
 		GeGe.DrawLines(app);
 		GeGe.DrawPoints(app);
+		TS.DrawSplines(app);
 
 		app.display();
 	}

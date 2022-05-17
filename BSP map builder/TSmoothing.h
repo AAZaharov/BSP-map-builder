@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "VectorMath.h"
+#include <list>
 
 using namespace sf;
 
@@ -10,21 +11,18 @@ class TSmoothing : public VectorMath
 {
 public:
 
-	Vector2f FindDeltaPoint(Vector2f& begin, Vector2f& end);
-
-	void BuildLines(Vector2f, Vector2f);
-
 	void BuildSpline(Vector2f& p0, Vector2f& p1, Vector2f& p2);
 
-	void SmoothLine(std::vector<Vector2f>& PointsVector);
+	void SmoothTheLines();
+
+	void SetContainer(std::vector<Vector2f>);
+	void SetContainer(std::list<Vector2f>&);
 
 	std::vector<Vector2f> GetContainer();
 
 	void EraseContainer();
 
-
-	std::vector<Vector2f> Scale(std::vector<Vector2f>&);
-
+	void DrawSplines(sf::RenderWindow&);
 
 private:
 
@@ -33,6 +31,9 @@ private:
 
 	const float t = 0.005; //smoothing step
 	std::vector<Vector2f> VectorContainer;
+
+	std::list<Vector2f> SplineContainer;
+	/*std::list<Vector2f> VectorContainer;*/
 	
 
 };

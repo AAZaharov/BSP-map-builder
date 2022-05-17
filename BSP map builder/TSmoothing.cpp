@@ -3,31 +3,10 @@
 #include <iostream>
 
 
-
-Vector2f TSmoothing::FindDeltaPoint(Vector2f& begin, Vector2f& end)
-{
-	float step = 0.5;
-	float dx = begin.x + (end.x - begin.x) * step;
-	float dy = begin.y + (end.y - begin.y) * step;
-	return Vector2f(dx, dy);
-}
-
-void TSmoothing::BuildLines(Vector2f p0, Vector2f p1)
-{
-	float hyp = sqrt((p1.x - p0.x) * (p1.x - p0.x) + (p1.y - p0.y) * (p1.y - p0.y));
-	float cat = p1.y - p0.y;
-	float alpha = hyp / cat;
-
-	RectangleShape line_with_thickness(Vector2f(hyp, 5.f));
-	line_with_thickness.setFillColor(Color::Red);
-	line_with_thickness.setRotation(alpha);
-}
-
-
 void TSmoothing::BuildSpline(Vector2f& p0, Vector2f& p1, Vector2f& p2)
 {
-	Vector2f dp0 = FindDeltaPoint(p0, p1);
-	Vector2f dp2 = FindDeltaPoint(p2, p1);
+	Vector2f dp0 = FindDeltaPoint(p0, p1, 0.5);
+	Vector2f dp2 = FindDeltaPoint(p2, p1, 0.5);
 
 
 	for (float f = t; f < 1; f += t)
@@ -35,32 +14,53 @@ void TSmoothing::BuildSpline(Vector2f& p0, Vector2f& p1, Vector2f& p2)
 		Vector2f vectortmp;
 		vectortmp.x = (1 - f) * (1 - f) * dp0.x + 2 * f * (1 - f) * p1.x + f * f * dp2.x;
 		vectortmp.y = (1 - f) * (1 - f) * dp0.y + 2 * f * (1 - f) * p1.y + f * f * dp2.y;
-		VectorContainer.push_back(vectortmp);
+		SplineContainer.push_back(vectortmp);
 	}
 }
 
-void TSmoothing::SmoothLine(std::vector<Vector2f>& PointsVector)
+void TSmoothing::SmoothTheLines()
 {
-	std::vector<Vector2f> tmp;
+	std::vector<Vector2f>::iterator itA, itB, itC;
 
 	//Build spline on the first point
-	BuildSpline(PointsVector.at(PointsVector.size() - 1), PointsVector.at(0), PointsVector.at(1));
-	
+
+	itA = VectorContainer.begin();
+	itB = --VectorContainer.end();
+	itC = itA+1;
+
+	BuildSpline(*itB, *itA, *itC);
+
 
 	//Build spline on the last point
-	BuildSpline(PointsVector.at(PointsVector.size() - 2), PointsVector.at(PointsVector.size() - 1), PointsVector.at(0));
 
+	itC = itB-1;
 
+	BuildSpline(*itC, *itB, *itA);
 
 	//Build splines on other points
+	itB = itA + 1;
+	itC = itB + 1;
 
-	for (int i = 0; i + 2 < PointsVector.size(); ++i)
+	while(itC != VectorContainer.end())
 	{
-		BuildSpline(PointsVector.at(i), PointsVector.at(i + 1), PointsVector.at(i + 2));
-		
+		BuildSpline(*itA, *itB, *itC);
+		++itA;
+		++itB;
+		++itC;
 	}
 
+}
 
+void TSmoothing::SetContainer(std::vector<Vector2f> tmp)
+{
+	VectorContainer = tmp;
+}
+
+void TSmoothing::SetContainer(std::list<Vector2f>& PointList)
+{
+	std::vector<Vector2f> tmp;
+	std::copy(PointList.begin(), PointList.end(), std::back_inserter(tmp));
+	SetContainer(tmp);
 }
 
 std::vector<Vector2f> TSmoothing::GetContainer()
@@ -74,37 +74,15 @@ void TSmoothing::EraseContainer()
 }
 
 
-std::vector<Vector2f> TSmoothing::Scale(std::vector<Vector2f> &points)
+void TSmoothing::DrawSplines(sf::RenderWindow&app)
 {
-	std::vector<Vector2f> tmp;
-	Vector2f pointboofer;
-	//find offset point for first cell data
-
-	int count = 0;
-	std::cout << count << std::endl;
-
-	pointboofer = VectorMath::FindBis(points.at(0), points.at(points.size() - 1), points.at(1));
-	tmp.push_back(pointboofer);
-
-	//find offsets for points from middle range 
-
-	for (int i = 1; i < points.size()-1; ++i)
+	CircleShape point(3);
+	point.setOrigin(3, 3);
+	point.setFillColor(Color::Black);
+	for (auto& v : SplineContainer)
 	{
-		++count;
-		std::cout << count << std::endl;
-
-		pointboofer = VectorMath::FindBis(points.at(i), points.at(i - 1), points.at(i + 1));
-		tmp.push_back(pointboofer);
+		point.setPosition(v);
+		app.draw(point);
 	}
-
-	//find offset point for last cell data
-
-	++count;
-	std::cout << count << std::endl;
-
-	pointboofer = VectorMath::FindBis(points.at(points.size() - 1), points.at(points.size() - 2), points.at(0));
-	tmp.push_back(pointboofer);
-
-	return tmp;
 }
 
